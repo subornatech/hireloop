@@ -1,5 +1,26 @@
-import { AuthForm } from "@/components/auth/auth-form"
+'use client'
+
+
+import { AuthForm, AuthFormData } from "@/components/auth/auth-form"
+import { authClient } from "@/lib/auth-client";
 
 export default function SignInPage() {
-  return <AuthForm mode="sign-in" />
+
+  const handleSignIn = async (data : AuthFormData) =>{
+    const { data:signInResponse , error} = await authClient.signIn.email({
+    email:data.email,
+    password: data.password, 
+    rememberMe: true, 
+    callbackURL: "/", 
+}); 
+console.log(signInResponse, error)
+
+
+  }
+
+
+
+
+
+  return <AuthForm mode="sign-in"  onSubmit={handleSignIn}/>
 }
