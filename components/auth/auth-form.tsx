@@ -15,10 +15,20 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+export type UserRole = "seeker" | "recruiter" | "admin"
 
 export type AuthFormData = {
   name: string
   email: string
+  role: UserRole
   password: string
   image?: string
   confirmPassword?: string
@@ -51,6 +61,12 @@ const content = {
   },
 } as const
 
+const roles: { value: UserRole; label: string }[] = [
+  { value: "seeker", label: "Job seeker" },
+  { value: "recruiter", label: "Recruiter" },
+  { value: "admin", label: "Admin" },
+]
+
 function AuthForm({ mode, onSubmit }: AuthFormProps) {
   const isSignUp = mode === "sign-up"
   const copy = content[mode]
@@ -60,6 +76,7 @@ function AuthForm({ mode, onSubmit }: AuthFormProps) {
   > | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const [pending, setPending] = React.useState(false)
+  const [role, setRole] = React.useState<UserRole>("seeker")
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -71,9 +88,15 @@ function AuthForm({ mode, onSubmit }: AuthFormProps) {
       return typeof value === "string" ? value : ""
     }
 
+    const submittedRole = text("role")
+    const roleValue = roles.some(({ value }) => value === submittedRole)
+      ? (submittedRole as UserRole)
+      : role
+
     const values: AuthFormData = {
       name: text("fullName").trim(),
       email: text("email").trim(),
+      role: roleValue,
       password: text("password"),
       ...(isSignUp
         ? {
@@ -135,6 +158,36 @@ function AuthForm({ mode, onSubmit }: AuthFormProps) {
                 autoComplete="name"
                 required
               />
+            </Field>
+          )}
+
+          {isSignUp && (
+            <Field id="role" label="Account type">
+              <Select
+                name="role"
+                value={role}
+                onValueChange={(value) => setRole(value as UserRole)}
+              >
+                <SelectTrigger
+                  id="role"
+                  aria-label="Account type"
+                  className="h-11 w-full"
+                >
+                  <SelectValue placeholder="Select a role">
+                    {(value: string | null) =>
+                      roles.find((item) => item.value === value)?.label ??
+                      "Select a role"
+                    }
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map(({ value, label }) => (
+                    <SelectItem key={value} value={value} label={label}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
           )}
 

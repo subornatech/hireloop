@@ -10,6 +10,7 @@ export default function SignUpPage() {
     const { error } = await authClient.signUp.email({
       name: data.name,
       email: data.email,
+      role: data.role,
       password: data.password,
       image: data.image,
       callbackURL: "/",
