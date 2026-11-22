@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 
-const client = new MongoClient("mongodb://localhost:27017/database");
+const client = new MongoClient(process.env.BETTER_AUTH_DB_URI as string);
 const db = client.db('hireloopdb');
 
 export const auth = betterAuth({
@@ -11,12 +11,14 @@ export const auth = betterAuth({
     enabled: true, 
   }, 
 
-    socialProviders: {
-        google: { 
-            clientId: process.env.GOOGLE_CLIENT_ID as string, 
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
-        }, 
-    },
+    socialProviders: process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+        ? {
+            google: {
+                clientId: process.env.GOOGLE_CLIENT_ID,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            },
+        }
+        : undefined,
   database: mongodbAdapter(db, {
     client,
   }),
