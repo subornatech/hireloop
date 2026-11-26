@@ -1,3 +1,5 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
 
@@ -7,8 +9,15 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { buttonVariants } from "@/components/ui/button"
 import { authNav, mainNav, siteConfig } from "@/lib/nav"
 import { cn } from "@/lib/utils"
+import { useSession,signOut } from "@/lib/auth-client"
+import { Button } from "@base-ui/react"
 
 function SiteHeader() {
+  const {data:session}= useSession();
+  console.log(session);
+  const handleSignOut = async ()=>{
+    await signOut()
+  }
   return (
     <header className="sticky top-0 z-50 w-full px-4 pt-4 sm:px-6 lg:px-[60px]">
       <div className="mx-auto flex h-16 w-full max-w-[1320px] items-center rounded-2xl border border-border/60 bg-background/80 px-3 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sm:px-4 lg:h-[74px] lg:px-6">
@@ -49,7 +58,12 @@ function SiteHeader() {
           <div className="flex items-center gap-1 sm:gap-1.5">
             <ThemeToggle />
 
-            <Link
+           { 
+           session?.user ?  <> 
+           <Button onClick={handleSignOut} className="btn">SignOut</Button>
+           <span className="text-[#EDEDEF]">Welcome,{session.user.name}</span> </>:
+            <>
+             <Link
               href={authNav.signIn.href}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "lg" }),
@@ -68,6 +82,9 @@ function SiteHeader() {
             >
               {authNav.getStarted.title}
             </Link>
+            
+            </>
+           }
 
             <MobileNav items={mainNav} />
           </div>
