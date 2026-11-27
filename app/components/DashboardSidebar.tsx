@@ -7,6 +7,7 @@ import {
   ClipboardList,
   CreditCard,
   LayoutDashboard,
+  PlusCircle,
   Settings,
   Users,
   type LucideIcon,
@@ -23,8 +24,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useSession } from "@/lib/auth-client"
-
-type DashboardRole = "seeker" | "recruiter" | "admin"
+import { normalizeRole, type UserRole } from "@/lib/nav"
 
 type MenuItem = {
   id: string
@@ -33,7 +33,7 @@ type MenuItem = {
   icon: LucideIcon
 }
 
-const menuItemsByRole: Record<DashboardRole, MenuItem[]> = {
+const menuItemsByRole: Record<UserRole, MenuItem[]> = {
   seeker: [
     {
       id: "seeker-dashboard",
@@ -76,31 +76,37 @@ const menuItemsByRole: Record<DashboardRole, MenuItem[]> = {
     {
       id: "recruiter-dashboard",
       name: "Dashboard",
-      url: "/dashboard/recuiter",
+      url: "/dashboard/recruiter",
       icon: LayoutDashboard,
     },
     {
       id: "recruiter-company",
       name: "My Company",
-      url: "/dashboard/recuiter/company",
+      url: "/dashboard/recruiter/company",
       icon: Building2,
     },
     {
       id: "recruiter-jobs",
       name: "Manage Jobs",
-      url: "/dashboard/recuiter/jobs",
+      url: "/dashboard/recruiter/jobs",
       icon: BriefcaseBusiness,
+    },
+    {
+      id: "add-jobs",
+      name: "Add Jobs",
+      url: "/dashboard/recruiter/jobs/new",
+      icon: PlusCircle,
     },
     {
       id: "recruiter-applications",
       name: "Applications",
-      url: "/dashboard/recuiter/applications",
+      url: "/dashboard/recruiter/applications",
       icon: ClipboardList,
     },
     {
       id: "recruiter-settings",
       name: "Settings",
-      url: "/dashboard/recuiter/settings",
+      url: "/dashboard/recruiter/settings",
       icon: Settings,
     },
   ],
@@ -144,12 +150,10 @@ const menuItemsByRole: Record<DashboardRole, MenuItem[]> = {
   ],
 }
 
-const DEFAULT_ROLE: DashboardRole = "seeker"
-
 const DashboardSidebar = () => {
   const { data: session } = useSession()
-  const role = (session?.user?.role as DashboardRole | undefined) ?? DEFAULT_ROLE
-  const menuItems = menuItemsByRole[role] ?? menuItemsByRole[DEFAULT_ROLE]
+  const role = normalizeRole(session?.user?.role)
+  const menuItems = menuItemsByRole[role]
 
   return (
     <Sidebar>

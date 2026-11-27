@@ -6,18 +6,19 @@ import Link from "next/link"
 import { MobileNav } from "@/components/mobile-nav"
 import { NavLink } from "@/components/nav-link"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { buttonVariants } from "@/components/ui/button"
-import { authNav, mainNav, siteConfig } from "@/lib/nav"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { signOut, useSession } from "@/lib/auth-client"
+import { authNav, getMainNav, siteConfig } from "@/lib/nav"
 import { cn } from "@/lib/utils"
-import { useSession,signOut } from "@/lib/auth-client"
-import { Button } from "@base-ui/react"
 
 function SiteHeader() {
-  const {data:session}= useSession();
-  console.log(session);
-  const handleSignOut = async ()=>{
+  const { data: session } = useSession()
+  const navItems = getMainNav(session?.user?.role)
+
+  const handleSignOut = async () => {
     await signOut()
   }
+
   return (
     <header className="sticky top-0 z-50 w-full px-4 pt-4 sm:px-6 lg:px-[60px]">
       <div className="mx-auto flex h-16 w-full max-w-[1320px] items-center rounded-2xl border border-border/60 bg-background/80 px-3 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sm:px-4 lg:h-[74px] lg:px-6">
@@ -38,7 +39,7 @@ function SiteHeader() {
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
-            {mainNav.map((item) => (
+            {navItems.map((item) => (
               <NavLink
                 key={item.href}
                 href={item.href}
@@ -58,35 +59,40 @@ function SiteHeader() {
           <div className="flex items-center gap-1 sm:gap-1.5">
             <ThemeToggle />
 
-           { 
-           session?.user ?  <> 
-           <Button onClick={handleSignOut} className="btn">SignOut</Button>
-           <span className="text-[#EDEDEF]">Welcome,{session.user.name}</span> </>:
-            <>
-             <Link
-              href={authNav.signIn.href}
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "lg" }),
-                "hidden rounded-xl px-4 text-primary hover:bg-primary/10 hover:text-primary sm:inline-flex"
-              )}
-            >
-              {authNav.signIn.title}
-            </Link>
+            {session?.user ? (
+              <>
+                <Button onClick={handleSignOut} className="btn">
+                  SignOut
+                </Button>
+                <span className="text-[#EDEDEF]">
+                  Welcome, {session.user.name}
+                </span>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={authNav.signIn.href}
+                  className={cn(
+                    buttonVariants({ variant: "ghost", size: "lg" }),
+                    "hidden rounded-xl px-4 text-primary hover:bg-primary/10 hover:text-primary sm:inline-flex"
+                  )}
+                >
+                  {authNav.signIn.title}
+                </Link>
 
-            <Link
-              href={authNav.getStarted.href}
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "hidden rounded-xl px-5 shadow-sm sm:inline-flex"
-              )}
-            >
-              {authNav.getStarted.title}
-            </Link>
-            
-            </>
-           }
+                <Link
+                  href={authNav.getStarted.href}
+                  className={cn(
+                    buttonVariants({ size: "lg" }),
+                    "hidden rounded-xl px-5 shadow-sm sm:inline-flex"
+                  )}
+                >
+                  {authNav.getStarted.title}
+                </Link>
+              </>
+            )}
 
-            <MobileNav items={mainNav} />
+            <MobileNav items={navItems} />
           </div>
         </div>
       </div>
