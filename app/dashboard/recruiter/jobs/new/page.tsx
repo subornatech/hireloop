@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { createJob, type NewJobData } from "@/lib/actions/jobs"
 
 const categories = [
   "Engineering & Tech",
@@ -40,13 +41,16 @@ const salaryFrequencies = ["per hour", "per month", "per year"]
 
 export default function NewJobPage() {
   const [submitted, setSubmitted] = React.useState(false)
+  const [pending, setPending] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setError(null)
 
     const formData = new FormData(event.currentTarget)
 
-    const data = {
+    const data: NewJobData = {
       title: String(formData.get("title") ?? ""),
       companyName: String(formData.get("companyName") ?? ""),
       category: String(formData.get("category") ?? ""),
@@ -61,8 +65,13 @@ export default function NewJobPage() {
       requirements: String(formData.get("requirements") ?? ""),
     }
 
-    console.log("New job data:", data)
-    setSubmitted(true)
+    setPending(true)
+ 
+      const result = await createJob(data)
+      console.log("New job data:", data)
+      console.log("Create job result:", result)
+      setSubmitted(true)
+   
   }
 
   return (
@@ -245,6 +254,15 @@ export default function NewJobPage() {
               </Field>
             </section>
 
+            {error && (
+              <p
+                role="alert"
+                className="rounded-lg bg-destructive/10 p-3 text-center text-xs text-destructive"
+              >
+                {error}
+              </p>
+            )}
+
             {submitted && (
               <p
                 role="status"
@@ -256,8 +274,13 @@ export default function NewJobPage() {
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button type="submit" size="lg" className="w-full sm:w-auto">
-              Publish Job
+            <Button
+              type="submit"
+              size="lg"
+              disabled={pending}
+              className="w-full sm:w-auto"
+            >
+              {pending ? "Publishing..." : "Publish Job"}
             </Button>
           </CardFooter>
         </form>
